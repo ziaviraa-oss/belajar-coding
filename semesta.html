@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alam Semesta Kecil</title>
+  <style>
+    :root { --r: 140px; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, Helvetica, sans-serif;
+      color: white;
+      text-align: center;
+      background: linear-gradient(135deg, #1b1b3a, #3a2a6b, #1b1b3a);
+      min-height: 100vh;
+      background-attachment: fixed;
+    }
+    button {
+      font-size: 20px;
+      padding: 12px 24px;
+      border-radius: 20px;
+      border: none;
+      background-color: #ff7aa2;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    button:hover { background-color: #ff4f87; transform: scale(1.08); }
+    button:active { transform: scale(0.95); }
+
+    /* ===== layar ===== */
+    .layar {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.9s;
+    }
+    .layar.aktif { opacity: 1; visibility: visible; }
+    #buka { background: linear-gradient(180deg, #ffd6e8, #e4d9ff); color: #6b2b55; }
+    #buka h1 { font-size: 34px; margin: 0 0 10px; position: relative; z-index: 2; }
+    #buka p { margin: 0 0 24px; position: relative; z-index: 2; }
+    #buka button { position: relative; z-index: 2; }
+
+    /* ===== bunga pembukaan ===== */
+    .bunga {
+      position: absolute;
+      bottom: -10px;
+      transform-origin: bottom center;
+      animation: goyang 3s ease-in-out infinite alternate;
+    }
+    @keyframes goyang {
+      from { transform: rotate(-8deg); }
+      to { transform: rotate(8deg); }
+    }
+    .kelopak {
+      position: absolute;
+      top: -40px;
+      animation: jatuh 7s linear forwards;
+      pointer-events: none;
+    }
+    @keyframes jatuh {
+      to { transform: translateY(110vh) rotate(360deg); opacity: 0.4; }
+    }
+
+    /* ===== planet dan foto ===== */
+    #panggung { position: relative; width: 0; height: 0; }
+    .planet-utama {
+      position: absolute;
+      width: 130px; height: 130px;
+      margin: -65px 0 0 -65px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #ffd6a5, #ff8fab);
+      box-shadow: 0 0 40px rgba(255, 143, 171, 0.6);
+      animation: denyut 4s ease-in-out infinite alternate;
+      cursor: pointer;
+      transition: scale 0.4s, box-shadow 0.4s, filter 0.6s;
+    }
+    .planet-utama.beraksi {
+      scale: 1.3;
+      box-shadow: 0 0 90px rgba(255, 200, 230, 1);
+    }
+    .cincin {
+      position: absolute;
+      width: 190px; height: 50px;
+      top: 40px; left: -30px;
+      border: 5px solid rgba(255, 255, 255, 0.7);
+      border-radius: 50%;
+      transform: rotate(-20deg);
+    }
+    @keyframes denyut {
+      from { transform: scale(1); }
+      to { transform: scale(1.06); }
+    }
+    .orbit {
+      position: absolute;
+      top: 0; left: 0;
+      animation: putar 28s linear infinite;
+    }
+    @keyframes putar { to { transform: rotate(360deg); } }
+    .slot {
+      position: absolute;
+      top: 0; left: 0;
+      transform: rotate(var(--a)) translateX(var(--r));
+    }
+    .foto {
+      width: 70px; height: 70px;
+      margin: -35px 0 0 -35px;
+      border-radius: 50%;
+      border: 3px solid white;
+      background-color: #ff9ec0;
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+      animation: lawan 28s linear infinite;
+      cursor: pointer;
+    }
+    @keyframes lawan {
+      from { transform: rotate(calc(-1 * var(--a))); }
+      to { transform: rotate(calc(-1 * var(--a) - 360deg)); }
+    }
+    .orbit:hover, .orbit:hover .foto {
+      animation-play-state: paused;
+    }
+    .tulisan {
+      position: absolute;
+      bottom: 90px;
+      left: 0; right: 0;
+      padding: 0 24px;
+      font-size: 20px;
+    }
+    .tombol-bawah { position: absolute; bottom: 30px; left: 0; right: 0; }
+
+    /* ===== foto diperbesar ===== */
+    #besar {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s;
+    }
+    #besar.aktif { opacity: 1; visibility: visible; }
+    #besar img {
+      max-width: 85vw;
+      max-height: 80vh;
+      border-radius: 20px;
+      border: 4px solid white;
+      transform: scale(0.7);
+      transition: transform 0.4s;
+    }
+    #besar.aktif img { transform: scale(1); }
+
+    /* ===== penutup ===== */
+    #ucapan {
+      font-size: 22px;
+      max-width: 520px;
+      min-height: 110px;
+      padding: 0 24px;
+      margin: 0 0 20px;
+      transition: opacity 0.4s, transform 0.4s;
+    }
+    #ucapan.hilang { opacity: 0; transform: translateY(15px); }
+    #nomor { opacity: 0.6; font-size: 14px; margin-bottom: 16px; }
+
+    /* ===== bunga penutup web ===== */
+    #tutup {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      visibility: hidden;
+      background: rgba(255, 214, 232, 0);
+      transition: background 3s;
+    }
+    #tutup.aktif {
+      visibility: visible;
+      background: rgba(255, 214, 232, 0.97);
+    }
+    .bungaTutup {
+      position: absolute;
+      animation: tumbuh 0.8s ease-out both;
+    }
+    @keyframes tumbuh {
+      from { transform: scale(0) rotate(-90deg); opacity: 0; }
+      to { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+    #kataAkhir {
+      position: relative;
+      z-index: 2;
+      opacity: 0;
+      transition: opacity 1.5s;
+      color: #6b2b55;
+      background: rgba(255, 255, 255, 0.85);
+      padding: 24px 32px;
+      border-radius: 24px;
+    }
+    #kataAkhir.muncul { opacity: 1; }
+
+    /* ===== bintang, hati, kontrol ===== */
+    .bintang {
+      position: fixed;
+      z-index: 0;
+      pointer-events: none;
+      color: white;
+      animation: kedip 2s ease-in-out infinite alternate;
+    }
+    @keyframes kedip { from { opacity: 0.2; } to { opacity: 1; } }
+    .hati {
+      position: fixed;
+      bottom: -40px;
+      font-size: 28px;
+      z-index: 10;
+      pointer-events: none;
+      animation: naik 3s linear forwards;
+    }
+    @keyframes naik {
+      0% { transform: translateY(0) scale(0.6); opacity: 1; }
+      100% { transform: translateY(-110vh) scale(1.4); opacity: 0; }
+    }
+    #kontrol {
+      position: fixed;
+      top: 10px; right: 10px;
+      z-index: 20;
+      display: none;
+      text-align: right;
+    }
+    #kontrol button {
+      font-size: 14px;
+      padding: 6px 12px;
+      margin-left: 4px;
+      background-color: rgba(183, 156, 255, 0.9);
+    }
+    #judul { font-size: 12px; opacity: 0.8; margin: 4px 4px 0 0; }
+
+    @media (max-width: 480px) {
+      :root { --r: 105px; }
+      .foto { width: 54px; height: 54px; margin: -27px 0 0 -27px; }
+      .planet-utama { width: 100px; height: 100px; margin: -50px 0 0 -50px; }
+      .cincin { width: 150px; height: 40px; top: 30px; left: -25px; }
+      #buka h1 { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LAYAR 1: pembukaan -->
+  <div class="layar aktif" id="buka">
+    <h1>Untuk Kamu 🌸</h1>
+    <p>ada sesuatu kecil buat kamu</p>
+    <button onclick="masuk()">Masuk 🌸</button>
+  </div>
+
+  <!-- LAYAR 2: planet dan foto -->
+  <div class="layar" id="adegan">
+    <div id="panggung">
+      <div class="planet-utama"><div class="cincin"></div></div>
+      <div class="orbit">
+        <div class="slot" style="--a:0deg"><div class="foto" style="background-image:url('foto1.jpg')"></div></div>
+        <div class="slot" style="--a:60deg"><div class="foto" style="background-image:url('foto2.jpg')"></div></div>
+        <div class="slot" style="--a:120deg"><div class="foto" style="background-image:url('foto3.jpg')"></div></div>
+        <div class="slot" style="--a:180deg"><div class="foto" style="background-image:url('foto4.jpg')"></div></div>
+        <div class="slot" style="--a:240deg"><div class="foto" style="background-image:url('foto5.jpg')"></div></div>
+        <div class="slot" style="--a:300deg"><div class="foto" style="background-image:url('foto6.jpg')"></div></div>
+      </div>
+    </div>
+    <div class="tulisan">di antara semua bintang, kamu salah satu yang paling bersinar ✨</div>
+    <div class="tombol-bawah"><button onclick="keAkhir()">Lanjut 💌</button></div>
+  </div>
+
+  <!-- LAYAR 3: penutup -->
+  <div class="layar" id="akhir">
+    <p id="ucapan"></p>
+    <div id="nomor"></div>
+    <button id="btnLanjut" onclick="ucapanBerikut()">Berikutnya 💖</button>
+  </div>
+
+  <!-- foto diperbesar -->
+  <div id="besar" onclick="tutupFoto()">
+    <img id="fotoBesar" src="">
+  </div>
+
+  <!-- bunga penutup web -->
+  <div id="tutup">
+    <div id="kataAkhir">
+      <h2>Terima kasih sudah mampir 🌸</h2>
+      <p>semoga harimu penuh bunga</p>
+      <button onclick="location.reload()">Ulangi dari awal</button>
+    </div>
+  </div>
+
+  <!-- kontrol musik -->
+  <div id="kontrol">
+    <button id="musik" onclick="aturMusik()">⏸</button>
+    <button onclick="lagiBerikut()">⏭</button>
+    <div id="judul"></div>
+  </div>
+
+  <audio id="lagu"></audio>
+
+  <script>
+    var daftar = [
+      "Semangat yaaa, jangan lupa makan",
+      "jangan sakit lagi yaa jaga kesehatan",
+      "apa yang hari ini kamu tempuh kamu udah keren banget",
+      "keep goin pleaseeeee! we still have so many things on our wishlist that we haven't achieved yet",
+      "keep going, pretty girl. you deserve to always be happy, okayy?",
+      "u are so beautiful and such a genuinely kind person. love youu bestieee"
+    ];
+
+    var playlist = [
+      { judul: "Lagu pertama", file: "lagu.m4a" }
+      // tambah lagu: { judul: "Lagu kedua", file: "lagu2.mp3" }
+    ];
+
+    var lagu = document.getElementById("lagu");
+    var tombolMusik = document.getElementById("musik");
+    var judulLagu = document.getElementById("judul");
+    var nomorLagu = 0;
+    var sudahMulai = false;
+    var urut = 0;
+
+    /* ----- musik ----- */
+    function muatLagu() {
+      lagu.src = playlist[nomorLagu].file;
+      judulLagu.innerText = "🎵 " + playlist[nomorLagu].judul;
+    }
+    function lagiBerikut() {
+      nomorLagu = (nomorLagu + 1) % playlist.length;
+      muatLagu();
+      lagu.play();
+      tombolMusik.innerText = "⏸";
+    }
+    function aturMusik() {
+      if (lagu.paused) { lagu.play(); tombolMusik.innerText = "⏸"; }
+      else { lagu.pause(); tombolMusik.innerText = "▶"; }
+    }
+    lagu.addEventListener("ended", lagiBerikut);
+    muatLagu();
+
+    /* ----- pindah layar ----- */
+    function tampil(id) {
+      var semua = document.querySelectorAll(".layar");
+      for (var i = 0; i < semua.length; i++) {
+        semua[i].classList.remove("aktif");
+      }
+      document.getElementById(id).classList.add("aktif");
+    }
+    function masuk() {
+      if (!sudahMulai) {
+        lagu.play();
+        sudahMulai = true;
+        document.getElementById("kontrol").style.display = "block";
+      }
+      hatiBanyak();
+      tampil("adegan");
+    }
+    function keAkhir() {
+      urut = 0;
+      isiUcapan();
+      hatiBanyak();
+      tampil("akhir");
+    }
+
+    /* ----- penutup ----- */
+    function isiUcapan() {
+      document.getElementById("ucapan").innerText = daftar[urut];
+      document.getElementById("nomor").innerText = (urut + 1) + " / " + daftar.length;
+      var tombol = document.getElementById("btnLanjut");
+      if (urut === daftar.length - 1) {
+        tombol.innerText = "Selesai 🌸";
+      } else {
+        tombol.innerText = "Berikutnya 💖";
+      }
+    }
+    function ucapanBerikut() {
+      if (urut === daftar.length - 1) {
+        tutupBunga();
+        return;
+      }
+      var teks = document.getElementById("ucapan");
+      teks.classList.add("hilang");
+      setTimeout(function () {
+        urut = urut + 1;
+        isiUcapan();
+        teks.classList.remove("hilang");
+      }, 400);
+      hatiBanyak();
+    }
+
+    /* ----- bunga penutup web ----- */
+    function tutupBunga() {
+      var tutup = document.getElementById("tutup");
+      tutup.classList.add("aktif");
+      var jenis = ["🌸", "🌷", "🌹", "🌻", "🌼", "💐"];
+      for (var i = 0; i < 70; i++) {
+        var b = document.createElement("span");
+        b.className = "bungaTutup";
+        b.innerText = jenis[Math.floor(Math.random() * jenis.length)];
+        b.style.left = Math.random() * 95 + "vw";
+        b.style.top = Math.random() * 90 + "vh";
+        b.style.fontSize = 50 + Math.random() * 60 + "px";
+        b.style.animationDelay = Math.random() * 3 + "s";
+        tutup.appendChild(b);
+      }
+      setTimeout(function () {
+        document.getElementById("kataAkhir").classList.add("muncul");
+      }, 4000);
+      var meredup = setInterval(function () {
+        if (lagu.volume > 0.05) {
+          lagu.volume = Math.max(0, lagu.volume - 0.05);
+        } else {
+          lagu.pause();
+          clearInterval(meredup);
+        }
+      }, 300);
+    }
+
+    /* ----- foto diperbesar ----- */
+    var besar = document.getElementById("besar");
+    var fotoBesar = document.getElementById("fotoBesar");
+    var semuaFoto = document.querySelectorAll(".foto");
+    for (var n = 0; n < semuaFoto.length; n++) {
+      semuaFoto[n].addEventListener("click", function () {
+        var gaya = getComputedStyle(this).backgroundImage;
+        fotoBesar.src = gaya.slice(5, -2);
+        besar.classList.add("aktif");
+      });
+    }
+    function tutupFoto() {
+      besar.classList.remove("aktif");
+    }
+
+    /* ----- planet beraksi ----- */
+    var planet = document.querySelector(".planet-utama");
+    var putaranWarna = 0;
+    planet.addEventListener("click", function () {
+      putaranWarna = putaranWarna + 60;
+      planet.style.filter = "hue-rotate(" + putaranWarna + "deg)";
+      planet.classList.add("beraksi");
+      setTimeout(function () {
+        planet.classList.remove("beraksi");
+      }, 500);
+      hatiBanyak();
+    });
+
+    /* ----- hati ----- */
+    function hatiBanyak() {
+      for (var i = 0; i < 12; i++) { buatHati(); }
+    }
+    function buatHati() {
+      var hati = document.createElement("span");
+      hati.className = "hati";
+      hati.innerText = ["❤️", "💖", "💕", "💗"][Math.floor(Math.random() * 4)];
+      hati.style.left = Math.random() * 95 + "vw";
+      hati.style.animationDelay = Math.random() * 0.8 + "s";
+      document.body.appendChild(hati);
+      setTimeout(function () { hati.remove(); }, 4000);
+    }
+
+    /* ----- bintang ----- */
+    for (var b = 0; b < 30; b++) {
+      var bintang = document.createElement("span");
+      bintang.className = "bintang";
+      bintang.innerText = "✦";
+      bintang.style.left = Math.random() * 98 + "vw";
+      bintang.style.top = Math.random() * 95 + "vh";
+      bintang.style.fontSize = 8 + Math.random() * 14 + "px";
+      bintang.style.animationDelay = Math.random() * 2 + "s";
+      document.body.appendChild(bintang);
+    }
+
+    /* ----- bunga di layar pembukaan ----- */
+    var jenisBunga = ["🌸", "🌷", "🌹", "🌻", "🌼", "💐"];
+    var layarBuka = document.getElementById("buka");
+    for (var f = 0; f < 14; f++) {
+      var bunga = document.createElement("span");
+      bunga.className = "bunga";
+      bunga.innerText = jenisBunga[Math.floor(Math.random() * jenisBunga.length)];
+      bunga.style.left = (f * 7.2 + Math.random() * 3) + "vw";
+      bunga.style.fontSize = 36 + Math.random() * 34 + "px";
+      bunga.style.animationDelay = Math.random() * 2 + "s";
+      layarBuka.appendChild(bunga);
+    }
+    setInterval(function () {
+      if (!layarBuka.classList.contains("aktif")) return;
+      var k = document.createElement("span");
+      k.className = "kelopak";
+      k.innerText = "🌸";
+      k.style.left = Math.random() * 95 + "vw";
+      k.style.fontSize = 14 + Math.random() * 12 + "px";
+      layarBuka.appendChild(k);
+      setTimeout(function () { k.remove(); }, 7000);
+    }, 600);
+  </script>
+</body>
+</html>

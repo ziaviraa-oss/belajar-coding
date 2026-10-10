@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ucapan Lucu</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      text-align: center;
+      padding-top: 100px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #ffe4ec, #e4d9ff, #ffe4ec);
+      background-size: 300% 300%;
+      animation: gerak 8s ease infinite;
+    }
+    @keyframes gerak {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    #ucapan {
+      font-size: 22px;
+      max-width: 500px;
+      margin: 30px auto;
+      min-height: 80px;
+      transition: opacity 0.4s, transform 0.4s;
+    }
+    #ucapan.hilang {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    button {
+      font-size: 20px;
+      padding: 12px 24px;
+      border-radius: 20px;
+      border: none;
+      background-color: #ff7aa2;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+    button:hover {
+      background-color: #ff4f87;
+      transform: scale(1.1);
+    }
+    button:active {
+      transform: scale(0.95);
+    }
+    #musik {
+      display: block;
+      margin: 20px auto 0;
+      font-size: 16px;
+      padding: 8px 16px;
+      background-color: #b79cff;
+    }
+    .hati {
+      position: fixed;
+      bottom: -40px;
+      font-size: 28px;
+      pointer-events: none;
+      animation: naik 3s linear forwards;
+    }
+    @keyframes naik {
+      0% { transform: translateY(0) scale(0.6); opacity: 1; }
+      100% { transform: translateY(-110vh) scale(1.4); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Ucapan Lucu Hari Ini</h1>
+  <p id="ucapan">klik tombol dibawah!</p>
+  <button onclick="ganti()">klik aku</button>
+  <button id="musik" onclick="aturMusik()">⏸ Pause musik</button>
+
+  <audio id="lagu" src="lagu.mp3" loop></audio>
+
+  <script>
+    var daftar = [
+      "Semangat yaaa, jangan lupa makan",
+      "jangan sakit lagi yaa jaga kesehatan",
+      "apa yang hari ini kamu tempuh kamu udah keren banget",
+      "keep goin pleaseeeee! we still have so many things on our wishlist that we haven't achieved yet",
+      "keep going, pretty girl. you deserve to always be happy, okayy?",
+      "u are so beautiful and such a genuinely kind person. love youu bestieee"
+    ];
+
+    var lagu = document.getElementById("lagu");
+    var tombolMusik = document.getElementById("musik");
+    var sudahMulai = false;
+
+    function ganti() {
+      if (!sudahMulai) {
+        lagu.play();
+        sudahMulai = true;
+        tombolMusik.innerText = "⏸ Pause musik";
+      }
+
+      var teks = document.getElementById("ucapan");
+      teks.classList.add("hilang");
+      setTimeout(function () {
+        var acak = Math.floor(Math.random() * daftar.length);
+        teks.innerText = daftar[acak];
+        teks.classList.remove("hilang");
+      }, 400);
+
+      for (var i = 0; i < 12; i++) {
+        buatHati();
+      }
+    }
+
+    function buatHati() {
+      var hati = document.createElement("span");
+      hati.className = "hati";
+      hati.innerText = ["❤️", "💖", "💕", "💗"][Math.floor(Math.random() * 4)];
+      hati.style.left = Math.random() * 95 + "vw";
+      hati.style.animationDelay = Math.random() * 0.8 + "s";
+      document.body.appendChild(hati);
+      setTimeout(function () {
+        hati.remove();
+      }, 4000);
+    }
+
+    function aturMusik() {
+      if (lagu.paused) {
+        lagu.play();
+        tombolMusik.innerText = "⏸ Pause musik";
+      } else {
+        lagu.pause();
+        tombolMusik.innerText = "▶ Putar musik";
+      }
+    }
+  </script>
+</body>
+</html>
